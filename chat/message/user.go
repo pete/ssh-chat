@@ -284,10 +284,12 @@ type UserConfig struct {
 var DefaultUserConfig UserConfig
 
 func init() {
+	tfmt := "2006-01-02 15:04:05"
 	DefaultUserConfig = UserConfig{
 		Bell:  true,
 		Echo:  true,
 		Quiet: false,
+		Timeformat: &tfmt,
 	}
 
 	// TODO: Seed random?
