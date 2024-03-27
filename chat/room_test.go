@@ -254,7 +254,7 @@ func expectOutput(t *testing.T, buffer []byte, expected string) {
 	s := string(buffer)
 	// Just check the suffix instead of jumping through hoops.
 	if len(s) < len(expected) || s[len(s)-len(expected):] != expected {
-		t.Errorf("Got: %q; Expected: %q", s[len(s)-len(expected):], expected)
+		t.Errorf("Got: %q; Expected it to end with: %q", s, expected)
 	}
 }
 
