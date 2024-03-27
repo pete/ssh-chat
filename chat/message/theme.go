@@ -239,7 +239,7 @@ func init() {
 	}
 
 	DefaultTheme = &Themes[0]
-	MonoTheme = &Themes[3]
+	MonoTheme = &Themes[0]
 
 	/* Some debug helpers for your convenience:
 

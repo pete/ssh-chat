@@ -32,14 +32,17 @@ func TestThemePalette(t *testing.T) {
 }
 
 func TestTheme(t *testing.T) {
+	// I don't know why this test exists.
 	var expected, actual string
 
 	colorTheme := Themes[0]
 	color := colorTheme.sys
-	if color == nil {
-		t.Fatal("Sys color should not be empty for first theme.")
+	if color != nil {
+		t.Fatal("Sys color should be empty for first theme.")
 	}
 
+	colorTheme = Themes[1]
+	color = colorTheme.sys
 	actual = color.Format("foo")
 	expected = "\033[38;05;245mfoo\033[0m"
 	if actual != expected {

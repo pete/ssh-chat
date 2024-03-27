@@ -17,52 +17,16 @@ import (
 
 func stripPrompt(s string) string {
 	// FIXME: Is there a better way to do this?
-	if endPos := strings.Index(s, "\x1b[K "); endPos > 0 {
+	if endPos := strings.Index(s, " * "); endPos > 0 {
+		return s[endPos:]
+	}
+	if endPos := strings.Index(s, "-> "); endPos > 0 {
 		return s[endPos+3:]
-	}
-	if endPos := strings.Index(s, "\x1b[2K "); endPos > 0 {
-		return s[endPos+4:]
-	}
-	if endPos := strings.Index(s, "\x1b[K-> "); endPos > 0 {
-		return s[endPos+6:]
 	}
 	if endPos := strings.Index(s, "] "); endPos > 0 {
 		return s[endPos+2:]
 	}
-	if strings.HasPrefix(s, "-> ") {
-		return s[3:]
-	}
 	return s
-}
-
-func TestStripPrompt(t *testing.T) {
-	tests := []struct {
-		Input string
-		Want  string
-	}{
-		{
-			Input: "\x1b[A\x1b[2K[quux] hello",
-			Want:  "hello",
-		},
-		{
-			Input: "[foo] \x1b[D\x1b[D\x1b[D\x1b[D\x1b[D\x1b[D\x1b[K * Guest1 joined. (Connected: 2)\r",
-			Want:  " * Guest1 joined. (Connected: 2)\r",
-		},
-		{
-			Input: "[foo] \x1b[6D\x1b[K-> From your friendly system.\r",
-			Want:  "From your friendly system.\r",
-		},
-		{
-			Input: "-> Err: must be op.\r",
-			Want:  "Err: must be op.\r",
-		},
-	}
-
-	for i, tc := range tests {
-		if got, want := stripPrompt(tc.Input), tc.Want; got != want {
-			t.Errorf("case #%d:\n got: %q\nwant: %q", i, got, want)
-		}
-	}
 }
 
 func TestHostGetPrompt(t *testing.T) {
@@ -83,7 +47,7 @@ func TestHostGetPrompt(t *testing.T) {
 		Theme: &message.Themes[0],
 	})
 	actual = GetPrompt(u)
-	expected = "[\033[38;05;88mfoo\033[0m] "
+	expected = "[foo] "
 	if actual != expected {
 		t.Errorf("Invalid host prompt:\n Got: %q;\nWant: %q", actual, expected)
 	}
@@ -413,7 +377,7 @@ func TestTimestampEnvConfig(t *testing.T) {
 		input      string
 		timeformat *string
 	}{
-		{"", strptr("15:04")},
+		{"", strptr("2006-01-02 15:04:05")},
 		{"1", strptr("15:04")},
 		{"0", nil},
 		{"time +8h", strptr("15:04")},

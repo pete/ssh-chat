@@ -14,6 +14,7 @@ func TestMakeUser(t *testing.T) {
 
 	cfg := u.Config()
 	cfg.Theme = MonoTheme // Mono
+	cfg.Timeformat = nil
 	u.SetConfig(cfg)
 
 	m := NewAnnounceMsg("hello")
@@ -43,7 +44,7 @@ func TestRenderTimestamp(t *testing.T) {
 	cfg.Timeformat = &timefmt
 	u.SetConfig(cfg)
 
-	if got, want := cfg.Theme.Timestamp("foo"), `[38;05;245mfoo`+Reset; got != want {
+	if got, want := cfg.Theme.Timestamp("foo"), "foo"; got != want {
 		t.Errorf("Wrong timestamp formatting:\n got: %q\nwant: %q", got, want)
 	}
 
@@ -54,7 +55,7 @@ func TestRenderTimestamp(t *testing.T) {
 	u.HandleMsg(u.ConsumeOne())
 
 	s.Read(&actual)
-	expected = []byte(`[38;05;245mAA:BB` + Reset + `  [[38;05;88mfoo[0m] hello` + Newline)
+	expected = []byte(`AA:BB  [foo] hello` + Newline)
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Wrong screen output:\n Got: `%q`;\nWant: `%q`", actual, expected)
 	}

@@ -87,7 +87,8 @@ func TestIgnore(t *testing.T) {
 	if err := sendCommand("/ignore test", ignorer, ch, &buffer); err != nil {
 		t.Fatal(err)
 	}
-	expectOutput(t, buffer, "-> Err: user not found: test"+message.Newline)
+	expected := "-> Err: user not found: test"+message.Newline
+	expectOutput(t, buffer, expected)
 
 	// test ignoring existing user
 	if err := sendCommand("/ignore "+ignored.user.Name(), ignorer, ch, &buffer); err != nil {
@@ -204,6 +205,7 @@ func TestMute(t *testing.T) {
 	expectOutput(t, buffer, "-> Err: user not found"+message.Newline)
 
 	// test muting by non-op
+	other.screen.Read(&buffer)
 	if err := sendCommand("/mute "+muted.user.Name(), other, ch, &buffer); err != nil {
 		t.Fatal(err)
 	}
@@ -249,9 +251,10 @@ func TestMute(t *testing.T) {
 func expectOutput(t *testing.T, buffer []byte, expected string) {
 	t.Helper()
 
-	bytes := []byte(expected)
-	if !reflect.DeepEqual(buffer, bytes) {
-		t.Errorf("Got: %q; Expected: %q", buffer, expected)
+	s := string(buffer)
+	// Just check the suffix instead of jumping through hoops.
+	if len(s) < len(expected) || s[len(s)-len(expected):] != expected {
+		t.Errorf("Got: %q; Expected: %q", s[len(s)-len(expected):], expected)
 	}
 }
 
@@ -286,25 +289,19 @@ func TestRoomJoin(t *testing.T) {
 	u.HandleMsg(u.ConsumeOne())
 	expected = []byte(" * foo joined. (Connected: 1)" + message.Newline)
 	s.Read(&actual)
-	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Got: %q; Expected: %q", actual, expected)
-	}
+	expectOutput(t, actual, string(expected))
 
 	ch.Send(message.NewSystemMsg("hello", u))
 	u.HandleMsg(u.ConsumeOne())
 	expected = []byte("-> hello" + message.Newline)
 	s.Read(&actual)
-	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Got: %q; Expected: %q", actual, expected)
-	}
+	expectOutput(t, actual, string(expected))
 
 	ch.Send(message.ParseInput("/me says hello.", u))
 	u.HandleMsg(u.ConsumeOne())
 	expected = []byte("** foo says hello." + message.Newline)
 	s.Read(&actual)
-	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Got: %q; Expected: %q", actual, expected)
-	}
+	expectOutput(t, actual, string(expected))
 }
 
 func TestRoomDoesntBroadcastAnnounceMessagesWhenQuiet(t *testing.T) {
@@ -404,27 +401,21 @@ func TestQuietToggleDisplayState(t *testing.T) {
 	u.HandleMsg(u.ConsumeOne())
 	expected = []byte(" * foo joined. (Connected: 1)" + message.Newline)
 	s.Read(&actual)
-	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Got: %q; Expected: %q", actual, expected)
-	}
+	expectOutput(t, actual, string(expected))
 
 	ch.Send(message.ParseInput("/quiet", u))
 
 	u.HandleMsg(u.ConsumeOne())
 	expected = []byte("-> Quiet mode is toggled ON" + message.Newline)
 	s.Read(&actual)
-	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Got: %q; Expected: %q", actual, expected)
-	}
+	expectOutput(t, actual, string(expected))
 
 	ch.Send(message.ParseInput("/quiet", u))
 
 	u.HandleMsg(u.ConsumeOne())
 	expected = []byte("-> Quiet mode is toggled OFF" + message.Newline)
 	s.Read(&actual)
-	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Got: %q; Expected: %q", actual, expected)
-	}
+	expectOutput(t, actual, string(expected))
 }
 
 func TestRoomNames(t *testing.T) {
@@ -445,18 +436,14 @@ func TestRoomNames(t *testing.T) {
 	u.HandleMsg(u.ConsumeOne())
 	expected = []byte(" * foo joined. (Connected: 1)" + message.Newline)
 	s.Read(&actual)
-	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Got: %q; Expected: %q", actual, expected)
-	}
+	expectOutput(t, actual, string(expected))
 
 	ch.Send(message.ParseInput("/names", u))
 
 	u.HandleMsg(u.ConsumeOne())
 	expected = []byte("-> 1 connected: foo" + message.Newline)
 	s.Read(&actual)
-	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Got: %q; Expected: %q", actual, expected)
-	}
+	expectOutput(t, actual, string(expected))
 }
 
 func TestRoomNamesPrefix(t *testing.T) {

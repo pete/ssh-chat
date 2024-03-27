@@ -233,7 +233,7 @@ func (u *User) render(m Message) string {
 		} else {
 			ts = ts.UTC()
 		}
-		return cfg.Theme.Timestamp(ts.Format(*cfg.Timeformat)) + "  " + out + Newline
+		return ts.Format(*cfg.Timeformat) + "  " + out + Newline
 	}
 	return out + Newline
 }
